@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 module KMonad.Keyboard.Types
-  (
-    Switch(..)
+  ( DelayRate(..)
+  , Switch(..)
   , KeyEvent
   , mkKeyEvent
   , HasKeyEvent(..)
@@ -15,6 +15,14 @@ import KMonad.Prelude
 import KMonad.Keyboard.Keycode
 
 import qualified KMonad.Util.LayerStack as Ls
+--------------------------------------------------------------------------------
+
+data DelayRate = DelayRate
+  { _delay :: Dt
+  , _rate  :: Dt
+  } deriving (Eq, Show)
+
+-- makeLenses ''DelayRate
 
 --------------------------------------------------------------------------------
 -- $event

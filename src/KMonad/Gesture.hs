@@ -1,7 +1,22 @@
 -- |
 
 module KMonad.Gesture
+  ( -- * Basic types
+    Gesture
+  , GestureError(..)
+  , GestureReadError(..)
+  , Toggle(..)
 
+    -- * Creation and combination
+  , fromList
+  , readGesture
+  , tap
+  , around
+
+    -- * Viewing properties
+  , tag
+  , tags
+  )
 where
 
 import KMonad.Prelude hiding (try)
@@ -94,8 +109,8 @@ instance Show GestureReadError where
 instance Exception GestureReadError
 
 -- | Parse a Gesture straight from Text
-prsGesture :: Text -> Either GestureReadError (Gesture Text)
-prsGesture t = case runParser gest "" t of
+readGesture :: Text -> Either GestureReadError (Gesture Text)
+readGesture t = case runParser gest "" t of
   Left e -> Left . GestureParseError . ParseError $ e
   Right gs -> case fromList (toList gs) of
     Left e -> Left . GestureValidateError $ e
