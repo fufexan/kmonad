@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-|
 Module      : KMonad.Util
 Description : Various bits and bobs that I don't know where to put

@@ -39,11 +39,15 @@ library
   build-depends:
       base
     , cereal
-    -- , hspec
+    , dhall
+    , either
+    , Glob
+    , hspec
     , lens
     , megaparsec
     , mtl
     , optparse-applicative
+    , pretty-simple
     , resourcet
     , rio
     , time
@@ -57,7 +61,6 @@ library
       FlexibleContexts
       FlexibleInstances
       FunctionalDependencies
-      GeneralizedNewtypeDeriving
       LambdaCase
       MultiParamTypeClasses
       MultiWayIf
@@ -70,6 +73,7 @@ library
 
   exposed-modules:
       KMonad.App
+      KMonad.App.Cfg
       KMonad.App.Main
       KMonad.App.Types
       KMonad.Args
@@ -78,6 +82,8 @@ library
       KMonad.Args.Joiner
       KMonad.Args.TH
       KMonad.Args.Types
+      KMonad.Logging
+      KMonad.Logging.Cfg
       KMonad.Model
       KMonad.Model.Action
       KMonad.Model.BEnv
