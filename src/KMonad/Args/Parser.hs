@@ -142,13 +142,6 @@ keycodeP = fromNamed (Q.reverse keyNames ^.. Q.itemed) <?> "keycode"
 numP :: Parser Int
 numP = L.decimal
 
--- | Parse text with escaped characters between double quotes.
-textP :: Parser Text
-textP = do
-  _ <- char '\"'
-  s <- manyTill L.charLiteral (char '\"')
-  pure . T.pack $ s
-
 -- | Parse a variable reference
 derefP :: Parser Text
 derefP = prefix (char '@') *> word

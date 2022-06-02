@@ -4,12 +4,12 @@ let L = ./locale/linux/enUS.dhall
 
 let base =
       { logLevel = "warn"
-      , keyRepeat = "none"
-      , preKIOcmd = "none"
-      , postKIOcmd = "none"
-      , keymapFile = "xdg:keymap.kbd"
+      , keymapFile = "cfg:keymap.kbd"
       , cmdAllow = False
       , fallthrough = False
+      , keyRepeat = None Text
+      , preKIOcmd = None Text
+      , postKIOcmd = None Text
       }
 
 let linux = base //

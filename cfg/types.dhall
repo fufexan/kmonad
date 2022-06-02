@@ -5,15 +5,15 @@ let GestureNames = List { mapKey : Text, mapValue : Text }
 let KCfg =
       { codeNames : CodeNames
       , gestureNames : GestureNames
-      , logLevel : Text
-      , keyRepeat : Text
       , fallthrough : Bool
+      , cmdAllow : Bool
+      , logLevel : Text
       , keyInputCfg : Text
       , keyOutputCfg : Text
-      , preKIOcmd : Text
-      , postKIOcmd : Text
       , keymapFile : Text
-      , cmdAllow : Bool
+      , keyRepeat : Optional Text
+      , preKIOcmd : Optional Text
+      , postKIOcmd : Optional Text
       }
 
 in  { KCfg, CodeNames, GestureNames }
