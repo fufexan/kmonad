@@ -1,3 +1,4 @@
+{-# LANGUAGE QuasiQuotes #-}
 -- |
 
 module KMonad.App.Cfg.Invoc
@@ -17,14 +18,51 @@ import Data.Version (showVersion)
 
 import Options.Applicative
 
+import Text.RawString.QQ
+import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
+import qualified Text.PrettyPrint.ANSI.Leijen as L
 
+-- helpTxt :: String
+-- helpTxt = [r|Run KMonad
+
+-- this: is a thing
+-- that: is also a thing
+
+-- whill you allow me
+
+-- whitespace? |]
+
+import System.IO
+
+-- help-text -------------------------------------------------------------------
+
+-- TODO: Improve help-doc
+
+(<^>) :: Doc -> Doc -> Doc
+(<^>) = (L.<$>)
+
+headDoc :: Doc
+headDoc = [r|
+Start running a KMonad process. See https://github.com/kmonad/kmonad.git for
+more extensive documentation. How KMonad acquires and remaps events depends largely
+on a dhall configuration file (by default: $XDG_CONFIG_HOME/kmonad/kmonad.dhall)
+and a keymap (by default: $XDG_CONFIG_HOME/kmonad/keymap.kbd).
+|]
+
+specTxt :: Doc
+specTxt = [r|
+Many of the configuration options operate on a small DSL further documented on the
+github page.
+|]
+
+--------------------------------------------------------------------------------
 
 -- | Parse 'Invoc' from the evocation of this program
 getInvoc :: MonadIO m => m Invoc
 getInvoc = liftIO . customExecParser (prefs showHelpOnEmpty) $
   info (invocP <**> versioner <**> helper)
     (  fullDesc
-    <> progDesc "Start KMonad"
+    <> progDescDoc (Just $ headDoc <^> specTxt)
     <> header   "kmonad - an onion of buttons."
     )
 
@@ -67,8 +105,14 @@ invocP = Invoc
   <*> preKIOcmdP
   <*> postKIOcmdP
 
-runTypeP :: PM RunType
-runTypeP = optional $ argument f ( help "What KMonad should do" )
+runTypeP :: Parser RunType
+runTypeP = option f . mconcat $
+  [ long "do"
+  , short 'd'
+  , value FullRun
+  , help "What KMonad should do <run|ev-test|cfg-test>"
+
+  ]
   where f = maybeReader $ flip lookup
           [ ("run", FullRun), ("cfg-test", CfgTest), ("ev-test", EvTest) ]
 
@@ -109,7 +153,7 @@ logLevelP = optional . strOption . mconcat $
   [ long "log-level"
   , short 'l'
   , metavar "LEVEL"
-  , help "at what level to display log messages"
+  , help "at what level to display log messages <debug|info|warn|error>"
   ]
 
 keyRepeatP :: PM KeyRepeatSpec
