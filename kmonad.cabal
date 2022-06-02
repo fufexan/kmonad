@@ -37,7 +37,8 @@ library
     -Wno-name-shadowing
     -Wno-unused-imports
   build-depends:
-      base
+      ansi-wl-pprint
+    , base
     , cereal
     , dhall
     , either
@@ -48,8 +49,8 @@ library
     , mtl
     , optparse-applicative
     , pretty-simple
-    , resourcet
     , raw-strings-qq
+    , resourcet
     , rio
     , time
     , unliftio

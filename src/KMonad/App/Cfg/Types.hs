@@ -82,7 +82,7 @@ data AppCfg = AppCfg
 -- invoc  ----------------------------------------------------------------------
 
 data Invoc = Invoc
-  { irunType :: Maybe RunType
+  { irunType :: RunType
   , icfgFile :: Maybe FileSpec
   , ikeymapFile :: Maybe FileSpec
   , ifallthrough :: Maybe Bool
