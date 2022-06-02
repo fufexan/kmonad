@@ -184,4 +184,4 @@ tokenParser = megaReadM . M.choice . map (M.try . uncurry ((*>) . symbol))
 
 -- | Megaparsec <--> optparse-applicative interface
 megaReadM :: M.Parser a -> ReadM a
-megaReadM p = eitherReader (mapLeft show . M.parse p "" . fromString)
+megaReadM p = eitherReader (mapLeft show . M.parse p . fromString)

@@ -17,5 +17,12 @@ where
 
 import qualified KMonad.App as KMonad (main)
 
+import System.IO
+import KMonad.Prelude
+import KMonad.App.Cfg.Invoc (getInvoc)
+
+-- main :: IO ()
+-- main = KMonad.main
+
 main :: IO ()
-main = KMonad.main
+main = pPrint =<< getInvoc

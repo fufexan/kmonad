@@ -5,10 +5,18 @@ module KMonad.Parsing
   , ParserT
   , ParseError(..)
 
+  , parse
+  , parseT
+
   , sc
   , hsc
   , lex
   , hlex
+
+  , msP
+  , natP
+  , textP
+  , listOfP
 
   , module Text.Megaparsec
   , module Text.Megaparsec.Char
@@ -17,8 +25,8 @@ module KMonad.Parsing
 where
 
 import KMonad.Prelude
-
-import Text.Megaparsec hiding (ParseError)
+import Control.Arrow
+import Text.Megaparsec hiding (ParseError, parse)
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as X
 
@@ -40,6 +48,14 @@ instance Exception ParseError
 
 --------------------------------------------------------------------------------
 
+parse :: Parser a -> Text -> Either ParseError a
+parse p = runIdentity . parseT p
+
+parseT :: Monad m => ParserT m a -> Text -> m (Either ParseError a)
+parseT p = fmap (left ParseError) . runParserT p ""
+
+--------------------------------------------------------------------------------
+
 -- | Horizontal space consumption
 hsc :: Parser ()
 hsc = X.space space1 empty empty
@@ -55,3 +71,20 @@ sc = X.space space1 (X.skipLineComment  ";;") (X.skipBlockComment "#|" "|#")
 -- | Full space lexeme
 lex :: Parser a -> Parser a
 lex = X.lexeme sc
+
+--------------------------------------------------------------------------------
+
+-- | Parse a non-negative integer
+natP :: Parser Natural
+natP = X.decimal <?> "natural number"
+
+-- | Parse a natural number as a 'Dt' expressed as in milliseconds
+msP :: Parser Dt
+msP = view (from ms) <$> natP <?> "natural number expressing ms"
+
+-- | Parse a ""-surrounded string, supporting @\@-style escapes
+textP :: Parser Text
+textP = pack <$> (char '\"' *> manyTill X.charLiteral (char '\"' ))
+
+listOfP :: Parser a -> Parser [a]
+listOfP p = between (char '[') (char ']') $ sepBy p (hlex $ char ',')

@@ -49,6 +49,7 @@ library
     , optparse-applicative
     , pretty-simple
     , resourcet
+    , raw-strings-qq
     , rio
     , time
     , unliftio
@@ -74,8 +75,12 @@ library
   exposed-modules:
       KMonad.App
       KMonad.App.Cfg
+      KMonad.App.Cfg.Invoc
+      KMonad.App.Cfg.Spec
+      KMonad.App.Cfg.Types
       KMonad.App.Main
       KMonad.App.Types
+      KMonad.App.TypesNew
       KMonad.Args
       KMonad.Args.Cmd
       KMonad.Args.Parser
