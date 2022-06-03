@@ -6,3 +6,4 @@ import Dhall (FromDhall, ToDhall)
 
 
 newtype LogCfg = LogCfg { _logLevel :: LogLevel}
+  deriving (Eq, Show)

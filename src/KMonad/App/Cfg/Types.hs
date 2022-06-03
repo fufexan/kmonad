@@ -6,6 +6,7 @@ import KMonad.Prelude
 
 import KMonad.App.TypesNew
 
+import KMonad.Gesture
 import KMonad.Logging.Cfg
 import KMonad.Keyboard.Types (DelayRate(..))
 
@@ -14,9 +15,9 @@ import System.IO
 import Data.Either.Validation (Validation(..))
 import GHC.Generics (Generic)
 
+import qualified RIO.HashMap as M
 import qualified RIO.Text as T
 import qualified Dhall as D
-import qualified Dhall.Map as D
 
 --------------------------------------------------------------------------------
 
@@ -26,6 +27,7 @@ type KeyInputSpec = Text
 type KeyOutputSpec = Text
 type KeyRepeatSpec = Text
 type LogLevelSpec = Text
+type GestureExpr = Text
 
  -------------------------------------------------------------------------------
 
@@ -52,32 +54,32 @@ data KeyRepeatCfg
   -- NOTE^: Here we can add 'detect repeat from OS then ping' idea from github
 
 data  LocaleCfg = LocaleCfg
-  { namedCodes :: [(Name, Natural)] -- ^ An alist of (name, keycode) pairs
-  , namedGestures :: [(Name, Text)] -- ^ An alist of (name, gesture-string) pairs
-  }
+  { namedCodes :: M.HashMap Name Natural
+  , namedGestures :: M.HashMap Name (Gesture Natural)
+  } deriving (Eq, Show)
 
 data RunCfg = RunCfg
   { cfgFile :: File
   , keymapFile :: File
   , cmdAllow :: Bool
   , runType :: RunType
-  }
+  } deriving (Eq, Show)
 
 data KioCfg = KioCfg
   { keyRepeatCfg :: KeyRepeatCfg
   , fallthrough  :: Bool
-  , keyInputCfg  :: Maybe KeyInputCfg
-  , keyOutputCfg :: Maybe KeyOutputCfg
+  , keyInputCfg  :: KeyInputCfg
+  , keyOutputCfg :: KeyOutputCfg
   , preKIOcmd    :: Maybe Cmd
   , postKIOcmd   :: Maybe Cmd
-  }
+  } deriving (Eq, Show)
 
 data AppCfg = AppCfg
   { appLocaleCfg :: LocaleCfg
   , appLogCfg :: LogCfg
   , appKioCfg :: KioCfg
   , appRunCfg :: RunCfg
-  }
+  } deriving (Eq, Show)
 
 -- invoc  ----------------------------------------------------------------------
 
@@ -95,12 +97,26 @@ data Invoc = Invoc
   , ipostKIOcmd :: Maybe CmdSpec
   } deriving (Eq, Show)
 
+defCfgFile :: FileSpec
+defCfgFile = "cfg:kmonad.dhall"
+
 -- dhall -----------------------------------------------------------------------
 
 data DEntry k v = DEntry
-  { mapKey :: k
-  , mapValue :: v
+  { _mapKey :: k
+  , _mapValue :: v
   } deriving (Generic, D.FromDhall, Show)
+makeLenses ''DEntry
+
+type DMap k v= [DEntry k v]
+
+-- _Tuple :: Iso' (DEntry k v) (k, v)
+-- _Tuple = iso (\e -> (e^.mapKey, e^.mapValue)) $ uncurry DEntry
+
+
+-- | Use '_DMap' as a view of an alist as a DMap, and 'from _DMap' as its inverse
+_DMap :: Iso' [(k, v)] (DMap k v)
+_DMap = iso (map $ uncurry DEntry) (map $ view mapKey &&& view mapValue)
 
 -- | The settings that we want to expose to Dhall
 --
@@ -114,26 +130,27 @@ data DEntry k v = DEntry
 -- defaults *in dhall*. So the default invoc settings are to change nothing, the
 -- default CfgFile settings *are* the app defaults.
 data DhallCfg = DhallCfg
-  { dcodeNames    :: [DEntry Name Natural]
-  , dgestureNames :: [DEntry Name Text]
-  , dfallthrough  :: Bool
-  , dcmdAllow     :: Bool
-  , dlogLevel     :: LogLevelSpec
-  , dkeyInputCfg  :: KeyInputSpec
-  , dkeyOutputCfg :: KeyOutputSpec
-  , dkeymapFile   :: FileSpec
-  , dkeyRepeat    :: Maybe KeyRepeatSpec
-  , dpreKIOcmd    :: Maybe CmdSpec
-  , dpostKIOcmd   :: Maybe CmdSpec
+  { _dcodeNames    :: [DEntry Name Natural]
+  , _dgestureNames :: [DEntry Name GestureExpr]
+  , _dfallthrough  :: Bool
+  , _dcmdAllow     :: Bool
+  , _dlogLevel     :: LogLevelSpec
+  , _dkeyInputCfg  :: KeyInputSpec
+  , _dkeyOutputCfg :: KeyOutputSpec
+  , _dkeymapFile   :: FileSpec
+  , _dkeyRepeat    :: Maybe KeyRepeatSpec
+  , _dpreKIOcmd    :: Maybe CmdSpec
+  , _dpostKIOcmd   :: Maybe CmdSpec
   } deriving (Generic, D.FromDhall, Show)
+makeLenses ''DhallCfg
 
 
-loadDhallCfg :: MonadIO m => FilePath -> m DhallCfg
-loadDhallCfg f = do
-  let opt = D.defaultInterpretOptions { D.fieldModifier = T.drop 1 }
-  let dec = D.genericAutoWith opt
-  liftIO $ D.inputFile dec f
+-- loadDhallCfg :: MonadIO m => FilePath -> m DhallCfg
+-- loadDhallCfg f = do
+--   let opt = D.defaultInterpretOptions { D.fieldModifier = T.drop 1 }
+--   let dec = D.genericAutoWith opt
+--   liftIO $ D.inputFile dec f
 
 
-testDhall :: IO ()
-testDhall = pPrint =<< loadDhallCfg "/home/david/prj/kmonad/cfg/linux.dhall"
+-- testDhall :: IO ()
+-- testDhall = pPrint =<< loadDhallCfg "/home/david/prj/kmonad/cfg/linux.dhall"

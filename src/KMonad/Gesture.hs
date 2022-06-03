@@ -36,11 +36,13 @@ import qualified RIO.Set  as S
 
 --------------------------------------------------------------------------------
 
-data Toggle a = On a | Off a deriving (Eq, Show, Functor)
+data Toggle a = On a | Off a
+  deriving (Eq, Show, Functor, Foldable, Traversable)
+
 
 -- | A sequence of toggle-changes guaranteed to be valid
 newtype Gesture a = Gesture { _gesture :: Q.Seq (Toggle a) }
-  deriving (Eq, Show, Functor)
+  deriving (Eq, Show, Functor, Foldable, Traversable)
 
 instance Semigroup (Gesture a) where
   (Gesture a) <> (Gesture b) = Gesture $ a <> b

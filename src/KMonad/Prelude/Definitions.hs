@@ -7,10 +7,14 @@ module KMonad.Prelude.Definitions
   , Dt
   , us
   , ms
+
+  , duplicates
   )
 where
 
 import KMonad.Prelude.Imports
+
+import qualified RIO.List as L
 
 --------------------------------------------------------------------------------
 
@@ -27,3 +31,12 @@ makeLenses ''Dt
 -- | A lens between a non-negative amount of milliseconds and 'Dt'
 ms :: Iso' Dt Natural
 ms = iso (view $ us . to (`div` 1000)) (Dt . (* 1000))
+
+
+--------------------------------------------------------------------------------
+
+-- | Return a list of duplicate elements
+--
+-- This could be faster but is never really used for time-critical or large tasks.
+duplicates :: Eq a => [a] -> [a]
+duplicates l = (L.\\) l $ L.nub l
