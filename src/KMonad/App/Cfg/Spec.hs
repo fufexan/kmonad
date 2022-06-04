@@ -13,18 +13,6 @@ import qualified RIO.Text as T
 
 -- basic -----------------------------------------------------------------------
 
-data Spec a = Spec
-  { encode :: a -> Text
-  , decode :: Text -> Either ParseError a }
-
--- | Create a prism from a parser and a printer
-mkSpec :: (a -> Text) -> Parser a -> Spec a
-mkSpec s = Spec s . parse
-
--- | Use a 'Spec' as a prism to 'Text'
-as :: Spec a -> Prism' Text a
-as s = prism' (encode s) $ either (const Nothing) Just . decode s
-
 -- file ------------------------------------------------------------------------
 
 -- | A parser that tries to extract a 'File' from 'Text'

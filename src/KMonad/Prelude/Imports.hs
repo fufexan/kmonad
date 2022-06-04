@@ -4,13 +4,14 @@ module KMonad.Prelude.Imports
   ( module X )
 where
 
-import Control.Arrow      as X (left, right)
-import Control.Lens       as X
-import Control.Monad.Cont as X
-import Data.Acquire       as X
-import GHC.Conc           as X (orElse)
-import RIO.Text           as X (unlines, lines, unpack, pack)
-import Text.Pretty.Simple as X (pPrint, pShow)
+import Control.Arrow          as X (left, right)
+import Control.Exception.Lens as X
+import Control.Lens           as X
+import Control.Monad.Cont     as X
+import Data.Acquire           as X
+import GHC.Conc               as X (orElse)
+import RIO.Text               as X (unlines, lines, unpack, pack)
+import Text.Pretty.Simple     as X (pPrint, pShow)
 
 import RIO as X hiding
   (-- Not the lens stuff, I want more support for lenses from "Control.Lens"

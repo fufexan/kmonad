@@ -1,12 +1,17 @@
--- | A collection of general parsing definitions
+-- |
 
-module KMonad.Parsing
+module KMonad.Expr
   ( Parser
   , ParserT
   , ParseError(..)
 
   , parse
   , parseT
+
+  , Expr
+  , as
+  , parser
+  , render
 
   , sc
   , hsc
@@ -18,22 +23,16 @@ module KMonad.Parsing
   , textP
   , listOfP
 
-  , namedP
-
   , module Text.Megaparsec
   , module Text.Megaparsec.Char
   )
-
 where
 
-import KMonad.Prelude hiding (try)
+import KMonad.Prelude
 import Control.Arrow
 import Text.Megaparsec hiding (ParseError, parse)
 import Text.Megaparsec.Char
-
 import qualified Text.Megaparsec.Char.Lexer as X
-import qualified RIO.List as L
-import qualified RIO.Text as T
 
 --------------------------------------------------------------------------------
 
@@ -49,6 +48,17 @@ instance Show ParseError where
   show (ParseError e) = "Parse error at " <> errorBundlePretty e
 
 instance Exception ParseError
+
+-- expr ------------------------------------------------------------------------
+
+data Expr a = Expr
+  { _render :: a -> Text
+  , _parser :: Parser a }
+makeLenses ''Expr
+
+-- | Use an 'Expr' to interpret some text
+as :: Expr a -> Getter Text (Either ParseError a)
+as e = to $ parse (e^.parser)
 
 --------------------------------------------------------------------------------
 
@@ -92,16 +102,3 @@ textP = pack <$> (char '\"' *> manyTill X.charLiteral (char '\"' ))
 
 listOfP :: Parser a -> Parser [a]
 listOfP p = between (char '[') (char ']') $ sepBy p (hlex $ char ',')
-
---------------------------------------------------------------------------------
-
-
--- | Create a parser that matches symbols to values and only consumes on match.
-namedP :: Named a -> Parser a
-namedP = do
-  -- Sort descending in length, and then alphabetically
-  let srt = L.sortBy . (`on` fst) $ \a b ->
-        case compare (T.length b) (T.length a) of
-          EQ -> compare a b
-          x  -> x
-  choice . map (\(s, x) -> try (string s) $> x). srt
